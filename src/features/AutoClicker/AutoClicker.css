@@ -9,6 +9,11 @@
   grid-column: 1 / -1;
 }
 
+.macro-recorder,
+.keybinds-panel {
+  grid-column: 1 / -1;
+}
+
 .field-row {
   display: flex;
   align-items: center;
@@ -146,4 +151,137 @@ kbd {
   .autoclicker-grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* Macro Recorder */
+
+.status-pill-recording {
+  background: rgba(255, 107, 107, 0.15);
+  color: #ff6b6b;
+}
+
+.status-pill-recording::before {
+  background: #ff6b6b;
+  box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.25);
+}
+
+.macro-counter {
+  font-size: 1.15rem;
+}
+
+.muted-inline {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-weight: 400;
+}
+
+.macro-actions {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.macro-actions button {
+  flex: 1;
+}
+
+.speed-row {
+  margin-bottom: 4px;
+}
+
+.speed-readout {
+  font-weight: 700;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.speed-slider {
+  width: 100%;
+  padding: 0;
+  accent-color: var(--accent);
+  background: transparent;
+  border: none;
+  margin-bottom: 8px;
+}
+
+.speed-presets {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.speed-preset-active {
+  color: var(--accent) !important;
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.checkbox-row input {
+  width: auto;
+  padding: 0;
+}
+
+/* Keybinds */
+
+.keybind-list {
+  list-style: none;
+  margin: 0 0 14px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.keybind-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 4px;
+  border-bottom: 1px solid var(--border);
+}
+
+.keybind-row:last-child {
+  border-bottom: none;
+}
+
+.keybind-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.keybind-label {
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.keybind-hint {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.keybind-control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.keybind-combo {
+  min-width: 70px;
+  text-align: center;
+}
+
+.keybind-listening {
+  font-size: 0.8rem;
+  color: var(--accent);
+  font-weight: 600;
 }

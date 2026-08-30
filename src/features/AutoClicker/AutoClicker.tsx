@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
+import MacroRecorder from "./MacroRecorder";
+import Keybinds from "./Keybinds";
 import "./AutoClicker.css";
 
 type MouseButtonOption = "left" | "right" | "middle";
@@ -293,11 +295,15 @@ export default function AutoClicker() {
           </div>
 
           <p className="hint muted">
-            Tip: press <kbd>F6</kbd> anywhere to start/stop instantly, even if the app isn't focused.
+            Tip: the "Toggle Simple Clicker" hotkey below starts/stops this instantly, even if
+            the app isn't focused.
           </p>
 
           {error && <p className="error-text">{error}</p>}
         </section>
+
+        <MacroRecorder />
+        <Keybinds />
       </div>
     </div>
   );
