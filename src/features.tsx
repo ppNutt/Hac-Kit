@@ -79,8 +79,8 @@ export const features: Feature[] = [
   },
   {
     id: "top-hacking-websites",
-    label: "Top Hacking Websites",
-    description: "Curated list of trusted cybersecurity learning resources.",
+    label: "Tool Explorer",
+    description: "Visual directory of trusted cybersecurity tools and learning resources.",
     icon: GlobeIcon,
     component: TopHackingWebsites,
   },

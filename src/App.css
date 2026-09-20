@@ -11,6 +11,13 @@
   --text-primary: #eef1f4;
   --text-secondary: #9aa5b1;
   --text-muted: #6b7480;
+  --focus-ring: rgba(61, 220, 151, 0.36);
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 28px;
 
   font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
   font-size: 15px;
@@ -25,6 +32,7 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 * {
@@ -146,6 +154,7 @@ select:focus,
 button:focus-visible {
   outline: none;
   border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--focus-ring);
 }
 
 .primary-button {

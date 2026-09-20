@@ -3,6 +3,7 @@ import Sidebar from "./components/Sidebar";
 import { features } from "./features";
 import type { FeatureId } from "./features";
 import "./App.css";
+import "./components/ui/ui.css";
 
 function App() {
   const [activeId, setActiveId] = useState<FeatureId>(features[0].id);

@@ -1,0 +1,119 @@
+.nmap-layout {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.nmap-panel-full {
+  grid-column: 1 / -1;
+}
+
+.nmap-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.nmap-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.nmap-field label {
+  font-size: 0.84rem;
+  color: var(--text-secondary);
+}
+
+.nmap-hint {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.nmap-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.nmap-status-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.nmap-progress-track {
+  height: 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  overflow: hidden;
+}
+
+.nmap-progress-fill {
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.2s ease;
+}
+
+.nmap-status-copy {
+  margin: 0;
+  font-size: 0.86rem;
+  color: var(--text-secondary);
+}
+
+.nmap-table-wrap {
+  overflow: auto;
+}
+
+.nmap-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.86rem;
+}
+
+.nmap-table th,
+.nmap-table td {
+  text-align: left;
+  padding: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.nmap-table th {
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.nmap-host-title {
+  margin: 0 0 8px;
+  font-size: 0.92rem;
+}
+
+.nmap-host-card {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+  background: var(--surface-1);
+}
+
+.nmap-host-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.nmap-explainer-list {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--text-secondary);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 0.86rem;
+}
+
+@media (max-width: 980px) {
+  .nmap-layout {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,15 +1,25 @@
 mod autoclicker;
 mod keybinds;
+mod nmap;
 mod recorder;
+mod wordlist_testing;
 
 use autoclicker::{
     get_auto_clicker_status, get_cursor_position, start_auto_clicker, stop_auto_clicker,
     AutoClickerState,
 };
 use keybinds::{get_keybinds, reset_keybinds, set_keybind, KeybindsState};
+use nmap::{
+    cancel_nmap_scan, check_nmap_availability, get_last_nmap_result, get_nmap_status,
+    start_nmap_scan, NmapState,
+};
 use recorder::{
     get_recording_summary, play_recording, start_recording, stop_playback, stop_recording,
     RecorderState,
+};
+use wordlist_testing::{
+    get_last_wordlist_result, get_wordlist_scenarios, get_wordlist_status, start_wordlist_test,
+    stop_wordlist_test, WordlistTestingState,
 };
 use tauri::Manager;
 
@@ -25,7 +35,9 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .manage(AutoClickerState::default())
         .manage(RecorderState::default())
-        .manage(KeybindsState::default());
+        .manage(KeybindsState::default())
+        .manage(NmapState::default())
+        .manage(WordlistTestingState::default());
 
     #[cfg(desktop)]
     {
@@ -89,7 +101,17 @@ pub fn run() {
             stop_playback,
             get_keybinds,
             set_keybind,
-            reset_keybinds
+            reset_keybinds,
+            check_nmap_availability,
+            get_nmap_status,
+            start_nmap_scan,
+            cancel_nmap_scan,
+            get_last_nmap_result,
+            get_wordlist_scenarios,
+            get_wordlist_status,
+            start_wordlist_test,
+            stop_wordlist_test,
+            get_last_wordlist_result
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -1,0 +1,124 @@
+.dictionary-layout {
+  display: grid;
+  grid-template-columns: minmax(260px, 340px) 1fr;
+  gap: 16px;
+}
+
+.dictionary-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.dictionary-count {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  margin: 0;
+}
+
+.dictionary-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 560px;
+  overflow: auto;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dictionary-entry-button {
+  width: 100%;
+  text-align: left;
+  padding: 12px;
+  border-radius: 10px;
+  background: var(--surface-1);
+}
+
+.dictionary-entry-button:hover {
+  background: var(--hover-bg);
+}
+
+.dictionary-entry-button-active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.dictionary-entry-term {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.dictionary-entry-summary {
+  margin: 6px 0 0;
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+}
+
+.dictionary-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.dictionary-badge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  border-radius: 999px;
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-secondary);
+}
+
+.dictionary-badge-safety {
+  border-color: rgba(255, 204, 102, 0.5);
+  background: rgba(255, 204, 102, 0.12);
+  color: #ffe6b2;
+}
+
+.dictionary-detail-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.dictionary-detail-card {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.dictionary-detail-card h3 {
+  margin: 0 0 8px;
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+}
+
+.dictionary-detail-card p {
+  margin: 0;
+  font-size: 0.89rem;
+}
+
+.dictionary-aliases {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.84rem;
+}
+
+.dictionary-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+@media (max-width: 940px) {
+  .dictionary-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .dictionary-list {
+    max-height: 280px;
+  }
+}
