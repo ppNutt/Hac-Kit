@@ -14,7 +14,8 @@ use nmap::{
     start_nmap_scan, NmapState,
 };
 use recorder::{
-    get_recording_summary, play_recording, start_recording, stop_playback, stop_recording,
+    get_playback_settings, get_recording_summary, play_recording, set_playback_settings,
+    start_recording, stop_playback, stop_recording,
     RecorderState,
 };
 use wordlist_testing::{
@@ -97,6 +98,8 @@ pub fn run() {
             start_recording,
             stop_recording,
             get_recording_summary,
+            get_playback_settings,
+            set_playback_settings,
             play_recording,
             stop_playback,
             get_keybinds,

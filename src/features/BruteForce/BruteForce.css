@@ -34,6 +34,42 @@
   font-size: 0.84rem;
 }
 
+.wordlist-source {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 0;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.wordlist-source legend,
+.wordlist-source label {
+  color: var(--text-secondary);
+  font-size: 0.84rem;
+}
+
+.wordlist-source label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.wordlist-add {
+  align-self: flex-start;
+}
+
+.wordlist-word-row {
+  display: flex;
+  gap: 8px;
+}
+
+.wordlist-word-row input {
+  flex: 1;
+  min-width: 0;
+}
+
 .wordlist-file-summary {
   border: 1px solid var(--border);
   background: var(--surface-1);

@@ -14,7 +14,6 @@ export type ToolLocation = "Web" | "Local";
 export interface CyberToolResource {
   id: string;
   name: string;
-  icon: string;
   description: string;
   category: ToolCategory;
   difficulty: ToolDifficulty;
@@ -37,7 +36,6 @@ export const resources: CyberToolResource[] = [
   {
     id: "shodan",
     name: "Shodan",
-    icon: "SH",
     description: "Search internet-facing systems and exposed service banners.",
     category: "reconnaissance",
     difficulty: "Beginner",
@@ -48,7 +46,6 @@ export const resources: CyberToolResource[] = [
   {
     id: "amass",
     name: "OWASP Amass",
-    icon: "AM",
     description: "Map attack surfaces through DNS and infrastructure discovery.",
     category: "reconnaissance",
     difficulty: "Intermediate",
@@ -59,7 +56,6 @@ export const resources: CyberToolResource[] = [
   {
     id: "burp-suite",
     name: "Burp Suite",
-    icon: "BP",
     description: "Intercept, test, and assess web application security behavior.",
     category: "web-security",
     difficulty: "Intermediate",
@@ -70,7 +66,6 @@ export const resources: CyberToolResource[] = [
   {
     id: "zap",
     name: "OWASP ZAP",
-    icon: "ZP",
     description: "Free open-source web scanner for beginners and teams.",
     category: "web-security",
     difficulty: "Beginner",
@@ -81,7 +76,6 @@ export const resources: CyberToolResource[] = [
   {
     id: "crt-sh",
     name: "crt.sh",
-    icon: "CT",
     description: "Explore certificate transparency logs for domain intelligence.",
     category: "osint",
     difficulty: "Beginner",
@@ -92,7 +86,6 @@ export const resources: CyberToolResource[] = [
   {
     id: "maltego",
     name: "Maltego",
-    icon: "ML",
     description: "Visual link analysis for infrastructure and identity investigations.",
     category: "osint",
     difficulty: "Intermediate",
@@ -103,7 +96,6 @@ export const resources: CyberToolResource[] = [
   {
     id: "any-run",
     name: "ANY.RUN",
-    icon: "AR",
     description: "Interactive malware sandbox with behavior timelines.",
     category: "malware-analysis",
     difficulty: "Intermediate",
@@ -114,7 +106,6 @@ export const resources: CyberToolResource[] = [
   {
     id: "ghidra",
     name: "Ghidra",
-    icon: "GH",
     description: "Reverse engineering suite for static binary analysis.",
     category: "malware-analysis",
     difficulty: "Advanced",
@@ -125,7 +116,6 @@ export const resources: CyberToolResource[] = [
   {
     id: "hashcat",
     name: "Hashcat",
-    icon: "HC",
     description: "High-performance password recovery utility for authorized testing.",
     category: "password-security",
     difficulty: "Advanced",
@@ -136,7 +126,6 @@ export const resources: CyberToolResource[] = [
   {
     id: "have-i-been-pwned",
     name: "Have I Been Pwned",
-    icon: "HP",
     description: "Check if accounts appeared in known public breach datasets.",
     category: "password-security",
     difficulty: "Beginner",
@@ -147,7 +136,6 @@ export const resources: CyberToolResource[] = [
   {
     id: "autopsy",
     name: "Autopsy",
-    icon: "AU",
     description: "Digital forensics platform for disk and artifact analysis.",
     category: "digital-forensics",
     difficulty: "Intermediate",
@@ -158,7 +146,6 @@ export const resources: CyberToolResource[] = [
   {
     id: "volatility",
     name: "Volatility",
-    icon: "VO",
     description: "Memory forensics framework for incident response workflows.",
     category: "digital-forensics",
     difficulty: "Advanced",
@@ -169,7 +156,6 @@ export const resources: CyberToolResource[] = [
   {
     id: "tryhackme",
     name: "TryHackMe",
-    icon: "TH",
     description: "Guided learning paths and practical defensive/offensive labs.",
     category: "training-labs",
     difficulty: "Beginner",
@@ -180,7 +166,6 @@ export const resources: CyberToolResource[] = [
   {
     id: "hack-the-box",
     name: "Hack The Box",
-    icon: "HB",
     description: "Hands-on labs and challenges for skill progression.",
     category: "training-labs",
     difficulty: "Intermediate",

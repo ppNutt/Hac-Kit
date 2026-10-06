@@ -1,4 +1,3 @@
-import { ShieldIcon } from "./icons";
 import { features } from "../features";
 import type { FeatureId } from "../features";
 import "./Sidebar.css";
@@ -12,7 +11,13 @@ export default function Sidebar({ activeId, onSelect }: SidebarProps) {
   return (
     <nav className="sidebar" aria-label="Feature navigation">
       <div className="sidebar-brand">
-        <ShieldIcon className="sidebar-brand-icon" />
+        <img
+          src="/hac-kit-logo.svg"
+          className="sidebar-brand-icon"
+          alt=""
+          width={40}
+          height={40}
+        />
         <span className="sidebar-brand-text">Hac-Kit</span>
       </div>
 

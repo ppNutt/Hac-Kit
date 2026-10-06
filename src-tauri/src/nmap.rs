@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 use std::io::{BufRead, BufReader};
+use std::path::PathBuf;
 use std::process::{Child, Command, Stdio};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
@@ -173,8 +174,44 @@ fn preset_args(preset: &str) -> Result<Vec<String>, String> {
     }
 }
 
+fn resolve_nmap_executable() -> Option<PathBuf> {
+    if Command::new("nmap").arg("--version").output().is_ok() {
+        return Some(PathBuf::from("nmap"));
+    }
+
+    if let Ok(nmap_home) = std::env::var("NMAP_HOME") {
+        let candidate = PathBuf::from(nmap_home).join("nmap.exe");
+        if candidate.exists() {
+            return Some(candidate);
+        }
+    }
+
+    if cfg!(target_os = "windows") {
+        let candidates = [
+            PathBuf::from(r"C:\Program Files (x86)\Nmap\nmap.exe"),
+            PathBuf::from(r"C:\Program Files\Nmap\nmap.exe"),
+        ];
+
+        for candidate in candidates {
+            if candidate.exists() {
+                return Some(candidate);
+            }
+        }
+    }
+
+    None
+}
+
 fn check_nmap() -> NmapAvailability {
-    let output = Command::new("nmap").arg("--version").output();
+    let Some(nmap_exe) = resolve_nmap_executable() else {
+        return NmapAvailability {
+            available: false,
+            version: String::new(),
+            message: "Nmap was not detected. Install Nmap and ensure it is available in PATH.".into(),
+        };
+    };
+
+    let output = Command::new(&nmap_exe).arg("--version").output();
     match output {
         Ok(out) if out.status.success() => {
             let text = String::from_utf8_lossy(&out.stdout);
@@ -353,7 +390,10 @@ pub fn start_nmap_scan(request: NmapScanRequest, app: AppHandle, state: State<Nm
     args.push("-".into());
     args.push(target.clone());
 
-    let mut command = Command::new("nmap");
+    let nmap_exe = resolve_nmap_executable()
+        .ok_or_else(|| "Nmap was not detected. Install Nmap and ensure it is available in PATH.".to_string())?;
+
+    let mut command = Command::new(nmap_exe);
     command.args(&args);
     command.stdout(Stdio::piped());
     command.stderr(Stdio::piped());

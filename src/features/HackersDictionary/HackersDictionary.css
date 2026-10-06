@@ -97,9 +97,38 @@
   color: var(--text-secondary);
 }
 
+.dictionary-example-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.dictionary-example-heading h3 {
+  margin: 0;
+}
+
+.dictionary-copy-button {
+  flex: 0 0 auto;
+  padding: 5px 9px;
+  font-size: 0.76rem;
+}
+
 .dictionary-detail-card p {
   margin: 0;
   font-size: 0.89rem;
+}
+
+.dictionary-detail-card .dictionary-example {
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.dictionary-detail-card .dictionary-copy-feedback {
+  margin-top: 8px;
+  color: var(--text-secondary);
+  font-size: 0.78rem;
 }
 
 .dictionary-aliases {

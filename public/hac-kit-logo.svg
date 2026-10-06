@@ -1,0 +1,32 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <title>Hac-Kit Logo</title>
+  <desc>Minimal cybersecurity terminal-style logo for Hac-Kit</desc>
+
+  <!-- Rounded app-icon background -->
+  <rect x="36" y="36" width="440" height="440" rx="104" fill="#101318"/>
+
+  <!-- Subtle inner border -->
+  <rect x="54" y="54" width="404" height="404" rx="88"
+        stroke="#7CFF6B" stroke-width="8" opacity="0.28"/>
+
+  <!-- Terminal prompt / H symbol -->
+  <path d="M137 166V346
+           M137 256H238
+           M238 166V346"
+        stroke="#7CFF6B"
+        stroke-width="34"
+        stroke-linecap="round"
+        stroke-linejoin="round"/>
+
+  <!-- K symbol -->
+  <path d="M286 166V346
+           M286 264L375 170
+           M307 243L383 346"
+        stroke="#F4F7F5"
+        stroke-width="34"
+        stroke-linecap="round"
+        stroke-linejoin="round"/>
+
+  <!-- Terminal cursor -->
+  <rect x="353" y="381" width="58" height="14" rx="7" fill="#7CFF6B"/>
+</svg>

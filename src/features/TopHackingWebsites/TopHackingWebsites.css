@@ -54,10 +54,13 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.76rem;
-  font-weight: 700;
   color: var(--accent);
   background: var(--accent-soft);
+}
+
+.tool-card-icon svg {
+  width: 20px;
+  height: 20px;
 }
 
 .tool-card-title {

@@ -55,12 +55,14 @@ const SCENARIOS: [ScenarioSecret; 3] = [
     },
 ];
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct WordlistTestRequest {
     pub scenario_id: String,
     pub words: Vec<String>,
     pub delay_ms: u64,
+    pub username: Option<String>,
+    pub password: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -179,6 +181,31 @@ fn find_scenario(id: &str) -> Option<&'static ScenarioSecret> {
     SCENARIOS.iter().find(|scenario| scenario.id == id)
 }
 
+fn resolve_credentials(
+    scenario_id: &str,
+    username: Option<&str>,
+    password: Option<&str>,
+) -> Result<(String, String), String> {
+    if scenario_id != "custom" {
+        let scenario = find_scenario(scenario_id)
+            .ok_or("Invalid scenario. Select a local training scenario.")?;
+        return Ok((scenario.username.to_string(), scenario.password.to_string()));
+    }
+
+    let username = username.unwrap_or("").trim();
+    if username.is_empty() || username.chars().count() > 254 {
+        return Err("Enter a demo username/email between 1 and 254 characters.".into());
+    }
+    let password = password.unwrap_or("");
+    if password.is_empty() || password.len() > MAX_WORD_LENGTH || !password.is_ascii() {
+        return Err("Enter a demo password with 1 to 128 ASCII characters.".into());
+    }
+    if password.trim() != password {
+        return Err("Demo passwords cannot have leading or trailing whitespace; candidates are trimmed.".into());
+    }
+    Ok((username.to_string(), password.to_string()))
+}
+
 #[tauri::command]
 pub fn get_wordlist_scenarios() -> Vec<WordlistScenario> {
     SCENARIOS
@@ -241,8 +268,11 @@ pub fn start_wordlist_test(
         return Err("A local demonstration is already running. Stop it first.".into());
     }
 
-    let scenario = find_scenario(&request.scenario_id)
-        .ok_or("Invalid scenario. Select one of the authorized local training scenarios.")?;
+    let (username, expected_password) = resolve_credentials(
+        &request.scenario_id,
+        request.username.as_deref(),
+        request.password.as_deref(),
+    )?;
     let words = validate_words(request.words)?;
     let delay_ms = request.delay_ms.clamp(10, 1000);
 
@@ -277,8 +307,6 @@ pub fn start_wordlist_test(
     let result_state = state.result.clone();
     let app_handle = app.clone();
     let scenario_id = request.scenario_id.clone();
-    let username = scenario.username.to_string();
-    let expected_password = scenario.password.to_string();
 
     std::thread::spawn(move || {
         let started = Instant::now();
@@ -373,4 +401,42 @@ pub fn start_wordlist_test(
     });
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn custom_credentials_match_wordlist_candidates() {
+        let (username, password) =
+            resolve_credentials("custom", Some(" learner@example.com "), Some("Demo123!")).unwrap();
+        let words = validate_words(vec!["wrong".into(), "Demo123!".into()]).unwrap();
+        assert_eq!(username, "learner@example.com");
+        assert_eq!(words.iter().position(|word| word == &password), Some(1));
+        assert!(!words.iter().any(|word| word == "different"));
+    }
+
+    #[test]
+    fn invalid_custom_credentials_are_rejected() {
+        for (username, password) in [
+            (None, Some("demo")),
+            (Some("demo"), None),
+            (Some("demo"), Some("")),
+            (Some("demo"), Some(" padded ")),
+            (Some("demo"), Some("\n")),
+        ] {
+            assert!(resolve_credentials("custom", username, password).is_err());
+        }
+        assert!(resolve_credentials("custom", Some("demo"), Some(&"a".repeat(129))).is_err());
+    }
+
+    #[test]
+    fn presets_keep_their_existing_credentials() {
+        let (username, password) =
+            resolve_credentials("demo-admin", Some("ignored"), Some("ignored")).unwrap();
+        assert_eq!(username, "admin.demo");
+        assert_eq!(password, "Summer2026!");
+        assert!(resolve_credentials("unknown", None, None).is_err());
+    }
 }

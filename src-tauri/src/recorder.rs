@@ -51,6 +51,29 @@ pub struct RecorderStatus {
 }
 
 const RECORDER_STATUS_EVENT: &str = "recorder://status";
+const RECORDER_ERROR_EVENT: &str = "recorder://error";
+
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PlaybackSettings {
+    pub speed: f64,
+    pub loop_playback: bool,
+}
+
+impl Default for PlaybackSettings {
+    fn default() -> Self {
+        Self {
+            speed: 1.0,
+            loop_playback: false,
+        }
+    }
+}
+
+impl PlaybackSettings {
+    fn scaled_delay(self, delay_ms: u64) -> u64 {
+        ((delay_ms as f64) / self.speed).round().max(0.0) as u64
+    }
+}
 
 fn emit_status(app: &AppHandle, mode: RecorderMode, event_count: u64, elapsed_ms: u64) {
     let _ = app.emit(
@@ -73,6 +96,7 @@ pub struct RecorderState {
     /// recording, so pressing e.g. Ctrl+C to stop recording doesn't tack a
     /// stray Ctrl+C onto the end of your macro.
     pub reserved_keys: Arc<Mutex<HashSet<Key>>>,
+    playback_settings: Arc<Mutex<PlaybackSettings>>,
     /// Timing state for the *current* recording. Reset every time
     /// `start_recording` runs so a second recording in the same app session
     /// doesn't inherit stale timestamps from the previous one.
@@ -88,10 +112,25 @@ impl Default for RecorderState {
             is_playing: Arc::new(AtomicBool::new(false)),
             buffer: Arc::new(Mutex::new(Vec::new())),
             reserved_keys: Arc::new(Mutex::new(HashSet::new())),
+            playback_settings: Arc::new(Mutex::new(PlaybackSettings::default())),
             last_event_time: Arc::new(Mutex::new(Instant::now())),
             last_move_time: Arc::new(Mutex::new(Instant::now())),
             is_first_event: Arc::new(AtomicBool::new(true)),
         }
+    }
+}
+
+impl RecorderState {
+    fn playback_settings(&self) -> Result<PlaybackSettings, String> {
+        self.playback_settings.lock().map(|settings| *settings).map_err(|e| e.to_string())
+    }
+
+    fn set_playback_settings(&self, settings: PlaybackSettings) -> Result<PlaybackSettings, String> {
+        if !settings.speed.is_finite() || !(0.1..=10.0).contains(&settings.speed) {
+            return Err("Playback speed must be between 0.1 and 10".into());
+        }
+        *self.playback_settings.lock().map_err(|e| e.to_string())? = settings;
+        Ok(settings)
     }
 }
 
@@ -189,9 +228,20 @@ pub fn get_recording_summary(state: State<RecorderState>) -> Result<u64, String>
 }
 
 #[tauri::command]
+pub fn get_playback_settings(state: State<RecorderState>) -> Result<PlaybackSettings, String> {
+    state.playback_settings()
+}
+
+#[tauri::command]
+pub fn set_playback_settings(
+    settings: PlaybackSettings,
+    state: State<RecorderState>,
+) -> Result<PlaybackSettings, String> {
+    state.set_playback_settings(settings)
+}
+
+#[tauri::command]
 pub fn play_recording(
-    speed: f64,
-    loop_playback: bool,
     app: AppHandle,
     state: State<RecorderState>,
 ) -> Result<(), String> {
@@ -201,7 +251,7 @@ pub fn play_recording(
     if state.is_playing.load(Ordering::SeqCst) {
         return Err("Already playing".into());
     }
-    let speed = speed.clamp(0.1, 10.0);
+    let settings = state.playback_settings()?;
 
     let events = state.buffer.lock().map_err(|e| e.to_string())?.clone();
     if events.is_empty() {
@@ -223,7 +273,7 @@ pub fn play_recording(
                     break 'playback;
                 }
 
-                let scaled_delay = ((recorded.delay_ms as f64) / speed).round().max(0.0) as u64;
+                let scaled_delay = settings.scaled_delay(recorded.delay_ms);
                 if scaled_delay > 0 {
                     std::thread::sleep(Duration::from_millis(scaled_delay));
                 }
@@ -240,7 +290,7 @@ pub fn play_recording(
                 );
             }
 
-            if !loop_playback {
+            if !settings.loop_playback {
                 break;
             }
         }
@@ -269,10 +319,64 @@ pub fn toggle_recording_from_hotkey(app: &AppHandle) {
     }
 }
 
-/// Invoked by the configured "play recording" global hotkey. Uses 1x speed,
-/// no loop — the UI's speed/loop controls only apply to plays started from
-/// the app itself, since a hotkey press carries no such parameters.
+/// Toggles playback using the same settings and Start/Stop commands as the UI.
 pub fn play_recording_from_hotkey(app: &AppHandle) {
     let state = app.state::<RecorderState>();
-    let _ = play_recording(1.0, false, app.clone(), state);
+    if state.is_playing.load(Ordering::SeqCst) {
+        stop_playback(app.clone(), state);
+        return;
+    }
+    if let Err(err) = play_recording(app.clone(), state) {
+        eprintln!("Hac-Kit: failed to play recording from hotkey: {err}");
+        if let Err(emit_err) = app.emit(RECORDER_ERROR_EVENT, &err) {
+            eprintln!("Hac-Kit: failed to report playback error: {emit_err}");
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn playback_defaults_to_normal_speed_without_looping() {
+        assert_eq!(
+            RecorderState::default().playback_settings().unwrap(),
+            PlaybackSettings { speed: 1.0, loop_playback: false }
+        );
+    }
+
+    #[test]
+    fn playback_uses_shared_speed_and_loop_settings() {
+        let state = RecorderState::default();
+        let shared_state = state.clone();
+        let settings = PlaybackSettings { speed: 2.5, loop_playback: true };
+        state.set_playback_settings(settings).unwrap();
+
+        let playback = shared_state.playback_settings().unwrap();
+        assert_eq!(playback, settings);
+        assert_eq!(playback.scaled_delay(1000), 400);
+
+        state.set_playback_settings(PlaybackSettings::default()).unwrap();
+        assert_eq!(shared_state.playback_settings().unwrap(), PlaybackSettings::default());
+        assert_eq!(playback, settings);
+    }
+
+    #[test]
+    fn playback_speed_limits_scale_delays() {
+        for (speed, expected) in [(0.1, 10000), (1.0, 1000), (10.0, 100)] {
+            let state = RecorderState::default();
+            state.set_playback_settings(PlaybackSettings { speed, loop_playback: false }).unwrap();
+            assert_eq!(state.playback_settings().unwrap().scaled_delay(1000), expected);
+        }
+    }
+
+    #[test]
+    fn invalid_speed_does_not_replace_playback_settings() {
+        let state = RecorderState::default();
+        for speed in [0.0, -1.0, 0.09, 10.1, f64::NAN, f64::INFINITY] {
+            assert!(state.set_playback_settings(PlaybackSettings { speed, loop_playback: true }).is_err());
+            assert_eq!(state.playback_settings().unwrap(), PlaybackSettings::default());
+        }
+    }
 }

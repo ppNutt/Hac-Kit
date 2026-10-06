@@ -19,19 +19,14 @@ interface KeybindConfig {
 
 const ACTIONS: { id: KeybindAction; label: string; hint: string }[] = [
   {
-    id: "toggleSimpleClicker",
-    label: "Toggle Simple Clicker",
-    hint: "Starts/stops the classic repeat-click mode above.",
-  },
-  {
     id: "toggleRecording",
-    label: "Toggle Macro Recording",
-    hint: "Starts/stops recording a new macro.",
+    label: "Toggle recording",
+    hint: "Start or stop recording movement and actions.",
   },
   {
     id: "playRecording",
-    label: "Play Macro Recording",
-    hint: "Plays back the last recorded macro once, at 1x speed.",
+    label: "Toggle macro playback",
+    hint: "Start with the selected speed and loop setting, or stop playback. Press again to stop a loop.",
   },
 ];
 
@@ -113,8 +108,7 @@ export default function Keybinds() {
     <section className="panel keybinds-panel">
       <h2 className="panel-title">Keybinds</h2>
       <p className="hint">
-        These hotkeys work globally, even when Hac-Kit isn't focused. Click "Change" and press a
-        new key combo to rebind an action.
+        These shortcuts work globally. Click a shortcut to change it.
       </p>
 
       <ul className="keybind-list">
@@ -125,20 +119,18 @@ export default function Keybinds() {
               <span className="keybind-hint">{hint}</span>
             </div>
             <div className="keybind-control">
-              {listeningFor === id ? (
-                <span className="keybind-listening">Press a key…</span>
-              ) : (
-                <kbd className="keybind-combo">
-                  {config ? formatShortcut(config[id]) : "…"}
-                </kbd>
-              )}
               <button
                 type="button"
-                className="link-button"
+                className="keybind-combo"
                 onClick={() => setListeningFor(id)}
                 disabled={listeningFor !== null}
+                title="Click to rebind"
               >
-                Change
+                {listeningFor === id
+                  ? "Press a key…"
+                  : config
+                    ? formatShortcut(config[id])
+                    : "…"}
               </button>
             </div>
           </li>

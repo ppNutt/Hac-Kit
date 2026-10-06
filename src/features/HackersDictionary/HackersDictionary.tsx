@@ -1,3 +1,4 @@
+import { useState } from "react";
 import FeatureLayout from "../../components/ui/FeatureLayout";
 import SearchInput from "../../components/ui/SearchInput";
 import FilterChips from "../../components/ui/FilterChips";
@@ -11,6 +12,7 @@ function getCategoryLabel(value: string): string {
 }
 
 export default function HackersDictionary() {
+  const [copyFeedback, setCopyFeedback] = useState<{ entryId: string; message: string } | null>(null);
   const {
     query,
     setQuery,
@@ -21,6 +23,15 @@ export default function HackersDictionary() {
     selectedId,
     setSelectedId,
   } = useDictionary();
+
+  const handleCopyExample = async (entryId: string, example: string) => {
+    try {
+      await navigator.clipboard.writeText(example);
+      setCopyFeedback({ entryId, message: "Example copied to clipboard." });
+    } catch {
+      setCopyFeedback({ entryId, message: "Could not copy example. Check clipboard permissions." });
+    }
+  };
 
   return (
     <FeatureLayout
@@ -112,8 +123,22 @@ export default function HackersDictionary() {
                 </article>
 
                 <article className="dictionary-detail-card">
-                  <h3>Example</h3>
-                  <p>{selectedEntry.example}</p>
+                  <div className="dictionary-example-heading">
+                    <h3>Example</h3>
+                    <button
+                      type="button"
+                      className="dictionary-copy-button"
+                      onClick={() => void handleCopyExample(selectedEntry.id, selectedEntry.example)}
+                    >
+                      Copy example
+                    </button>
+                  </div>
+                  <p className="dictionary-example">{selectedEntry.example}</p>
+                  {copyFeedback?.entryId === selectedEntry.id && (
+                    <p className="dictionary-copy-feedback" role="status">
+                      {copyFeedback.message}
+                    </p>
+                  )}
                 </article>
 
                 <article className="dictionary-detail-card">

@@ -38,6 +38,8 @@ interface WordlistTestRequest {
   scenarioId: string;
   words: string[];
   delayMs: number;
+  username?: string;
+  password?: string;
 }
 
 interface ImportedWordlist {
@@ -81,10 +83,14 @@ function toDelayMs(attemptsPerSecond: number): number {
 
 export default function BruteForce() {
   const [scenarios, setScenarios] = useState<WordlistScenario[]>([]);
-  const [selectedScenario, setSelectedScenario] = useState("");
+  const [selectedScenario, setSelectedScenario] = useState("custom");
+  const [customUsername, setCustomUsername] = useState("");
+  const [customPassword, setCustomPassword] = useState("");
   const [attemptsPerSecond, setAttemptsPerSecond] = useState(10);
   const [consentChecked, setConsentChecked] = useState(false);
   const [imported, setImported] = useState<ImportedWordlist | null>(null);
+  const [wordlistSource, setWordlistSource] = useState<"custom" | "file">("custom");
+  const [customWords, setCustomWords] = useState<string[]>([""]);
   const [status, setStatus] = useState<WordlistStatus>({
     running: false,
     phase: "idle",
@@ -112,9 +118,6 @@ export default function BruteForce() {
     invoke<WordlistScenario[]>("get_wordlist_scenarios")
       .then((items) => {
         setScenarios(items);
-        if (items.length > 0) {
-          setSelectedScenario(items[0].id);
-        }
       })
       .catch((err) => setError(String(err)));
 
@@ -141,6 +144,12 @@ export default function BruteForce() {
   );
 
   const previewWords = useMemo(() => imported?.words.slice(0, 6) ?? [], [imported]);
+  const activeWords = useMemo(
+    () => wordlistSource === "file"
+      ? imported?.words ?? []
+      : customWords.map((word) => word.trim()).filter((word) => word.length > 0),
+    [wordlistSource, imported, customWords],
+  );
 
   const handleFileImport = async (event: ChangeEvent<HTMLInputElement>) => {
     setError(null);
@@ -187,8 +196,10 @@ export default function BruteForce() {
 
   const handleStart = async () => {
     setError(null);
-    if (!imported) {
-      setError("Import a .txt wordlist before starting.");
+    if (activeWords.length === 0) {
+      setError(wordlistSource === "file"
+        ? "Import a .txt wordlist before starting."
+        : "Enter at least one word before starting.");
       return;
     }
     if (!selectedScenario) {
@@ -199,11 +210,18 @@ export default function BruteForce() {
       setError("Confirm authorized local use before starting.");
       return;
     }
+    if (selectedScenario === "custom" && (!customUsername.trim() || !customPassword)) {
+      setError("Enter a demo username/email and password for your custom local test.");
+      return;
+    }
 
     const request: WordlistTestRequest = {
       scenarioId: selectedScenario,
-      words: imported.words,
+      words: activeWords,
       delayMs: toDelayMs(attemptsPerSecond),
+      ...(selectedScenario === "custom"
+        ? { username: customUsername.trim(), password: customPassword }
+        : {}),
     };
 
     try {
@@ -236,8 +254,80 @@ export default function BruteForce() {
         </section>
 
         <section className="panel">
-          <h2 className="panel-title">1) Import wordlist (.txt)</h2>
+          <h2 className="panel-title">1) Choose your wordlist</h2>
           <div className="wordlist-form-stack">
+            <fieldset className="wordlist-source" disabled={status.running}>
+              <legend>Wordlist source</legend>
+              <label>
+                <input
+                  type="radio"
+                  name="wordlist-source"
+                  checked={wordlistSource === "custom"}
+                  onChange={() => setWordlistSource("custom")}
+                />
+                Write my own
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="wordlist-source"
+                  checked={wordlistSource === "file"}
+                  onChange={() => setWordlistSource("file")}
+                />
+                Upload .txt file
+              </label>
+            </fieldset>
+
+            {wordlistSource === "custom" ? (
+              <div className="wordlist-form-stack">
+                {customWords.map((word, index) => (
+                  <div className="wordlist-field" key={index}>
+                    <label htmlFor={`custom-word-${index}`}>Word {index + 1}</label>
+                    <div className="wordlist-word-row">
+                    <input
+                      id={`custom-word-${index}`}
+                      value={word}
+                      placeholder="Enter a candidate word"
+                      disabled={status.running}
+                      onChange={(event) => {
+                        const value = event.target.value;
+                        setCustomWords((words) => words.map((item, i) => i === index ? value : item));
+                      }}
+                    />
+                    <button
+                      type="button"
+                      aria-label={`Remove word ${index + 1}`}
+                      disabled={status.running}
+                      onClick={() => setCustomWords((words) => words.filter((_, i) => i !== index))}
+                    >
+                      x
+                    </button>
+                    </div>
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  className="wordlist-add"
+                  aria-label="Add another word"
+                  disabled={status.running || customWords.length >= 50000}
+                  onClick={() => setCustomWords((words) => [...words, ""])}
+                >
+                  + Add word
+                </button>
+                <button
+                  type="button"
+                  className="wordlist-add"
+                  disabled={status.running || customWords.length === 0}
+                  onClick={() => setCustomWords([])}
+                >
+                  Delete all
+                </button>
+                <p className="wordlist-muted">
+                  {activeWords.length} candidate{activeWords.length === 1 ? "" : "s"}. Empty fields are skipped.
+                </p>
+              </div>
+            ) : (
+              <>
             <div className="wordlist-field">
               <label htmlFor="wordlist-file">Wordlist file</label>
               <input
@@ -261,8 +351,8 @@ export default function BruteForce() {
                 </div>
 
                 <ul className="wordlist-preview" aria-label="Wordlist preview">
-                  {previewWords.map((word) => (
-                    <li key={word}>{word}</li>
+                  {previewWords.map((word, index) => (
+                    <li key={index}>{word}</li>
                   ))}
                 </ul>
               </>
@@ -271,6 +361,8 @@ export default function BruteForce() {
                 title="No wordlist loaded"
                 description="Import a .txt file to begin the local demonstration flow."
               />
+            )}
+              </>
             )}
           </div>
         </section>
@@ -286,6 +378,7 @@ export default function BruteForce() {
                 onChange={(event) => setSelectedScenario(event.target.value)}
                 disabled={status.running}
               >
+                <option value="custom">Custom local test</option>
                 {scenarios.map((scenario) => (
                   <option key={scenario.id} value={scenario.id}>
                     {scenario.label}
@@ -300,6 +393,40 @@ export default function BruteForce() {
                 </>
               )}
             </div>
+
+            {selectedScenario === "custom" && (
+              <>
+                <div className="wordlist-field">
+                  <label htmlFor="wordlist-username">Demo username / email</label>
+                  <input
+                    id="wordlist-username"
+                    value={customUsername}
+                    maxLength={254}
+                    autoComplete="off"
+                    placeholder="learner@example.com"
+                    disabled={status.running}
+                    onChange={(event) => setCustomUsername(event.target.value)}
+                  />
+                </div>
+                <div className="wordlist-field">
+                  <label htmlFor="wordlist-password">Demo target password</label>
+                  <input
+                    id="wordlist-password"
+                    type="password"
+                    value={customPassword}
+                    maxLength={128}
+                    autoComplete="new-password"
+                    disabled={status.running}
+                    onChange={(event) => setCustomPassword(event.target.value)}
+                  />
+                  <p className="wordlist-muted">
+                    Use made-up credentials, not a real account password. The username labels this
+                    local test; candidates are compared exactly against this password.
+                    Use 1 to 128 ASCII characters without leading or trailing spaces.
+                  </p>
+                </div>
+              </>
+            )}
 
             <div className="wordlist-field">
               <label htmlFor="attempt-rate">Attempt rate: {attemptsPerSecond}/second</label>
@@ -338,8 +465,28 @@ export default function BruteForce() {
               )}
             </div>
 
-            {error && <p className="error-text">{error}</p>}
+            {error && <p className="error-text" role="alert">{error}</p>}
           </div>
+        </section>
+
+        <section className="panel wordlist-panel-full">
+          <h2 className="panel-title">Vulnerable training labs</h2>
+          <p className="wordlist-muted">
+            These are separate learning resources, not targets for this test. Hac-Kit does not send
+            login attempts to them. Use your own lab instance and follow each project's rules.
+          </p>
+          <ul>
+            <li>
+              <a href="https://owasp.org/www-project-juice-shop/" target="_blank" rel="noopener noreferrer">
+                OWASP Juice Shop
+              </a> — an intentionally insecure web application for hands-on security training.
+            </li>
+            <li>
+              <a href="https://owasp.org/www-project-webgoat/" target="_blank" rel="noopener noreferrer">
+                OWASP WebGoat
+              </a> — a deliberately vulnerable application with guided security lessons.
+            </li>
+          </ul>
         </section>
 
         <section className="panel wordlist-panel-full">
